@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SLU IPEDS Dashboard — 2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f6f8; color: #1a1a2e; font-size: 14px; }
+  .topbar { background: #1F4E79; color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { font-size: 17px; font-weight: 600; letter-spacing: .01em; }
+  .topbar .sub { font-size: 12px; opacity: .7; margin-top: 2px; }
+  .badge { background: rgba(255,255,255,.18); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .nav { background: #fff; border-bottom: 1px solid #e2e6ea; padding: 0 28px; display: flex; gap: 4px; }
+  .nav-btn { padding: 11px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: #5f6b7c; border-bottom: 2px solid transparent; transition: all .15s; }
+  .nav-btn.active { color: #185FA5; border-bottom-color: #185FA5; }
+  .nav-btn:hover:not(.active) { color: #1a1a2e; background: #f5f6f8; }
+  .page { display: none; padding: 24px 28px; }
+  .page.active { display: block; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .kpi { background: #fff; border-radius: 10px; padding: 14px 16px; border: 1px solid #e8ecf0; }
+  .kpi-label { font-size: 11px; color: #8492a6; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+  .kpi-value { font-size: 24px; font-weight: 700; color: #1a1a2e; line-height: 1; }
+  .kpi-sub { font-size: 11px; color: #8492a6; margin-top: 4px; }
+  .kpi-accent { border-top: 3px solid #185FA5; }
+  .kpi-accent2 { border-top: 3px solid #1D9E75; }
+  .kpi-accent3 { border-top: 3px solid #D85A30; }
+  .kpi-accent4 { border-top: 3px solid #BA7517; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-grid.single { grid-template-columns: 1fr; }
+  .chart-card { background: #fff; border-radius: 10px; border: 1px solid #e8ecf0; padding: 18px 20px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: #3d4a5c; margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: #8492a6; margin-bottom: 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .legend span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #5f6b7c; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .footer { text-align: center; padding: 16px; font-size: 11px; color: #8492a6; border-top: 1px solid #e8ecf0; margin-top: 8px; }
+  @media (max-width: 600px) { .charts-grid { grid-template-columns: 1fr; } .kpi-row { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar h1" style="font-size:17px;font-weight:600">Saint Louis University — IPEDS Analytics Dashboard</div>
+    <div class="sub">Alumni Engagement &amp; Prospect Research &nbsp;·&nbsp; Fall 2024 / FY2024</div>
+  </div>
+  <div class="badge">IPEDS Data · Provisional</div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('admissions',this)">Admissions</button>
+  <button class="nav-btn" onclick="showPage('finance',this)">Finance</button>
+  <button class="nav-btn" onclick="showPage('hr',this)">Human Resources</button>
+</nav>
+
+<!-- ═══════════════ ADMISSIONS ═══════════════ -->
+<div id="admissions" class="page active">
+  <div class="kpi-row">
+    <div class="kpi kpi-accent"><div class="kpi-label">Total applicants</div><div class="kpi-value">15,533</div><div class="kpi-sub">Fall 2024</div></div>
+    <div class="kpi kpi-accent2"><div class="kpi-label">Admitted</div><div class="kpi-value">11,656</div><div class="kpi-sub">75% admit rate</div></div>
+    <div class="kpi kpi-accent3"><div class="kpi-label">Enrolled full-time</div><div class="kpi-value">1,613</div><div class="kpi-sub">14% yield rate</div></div>
+    <div class="kpi kpi-accent4"><div class="kpi-label">Women applicants</div><div class="kpi-value">55%</div><div class="kpi-sub">8,580 of 15,533</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Admissions funnel by gender</div>
+      <div class="chart-sub">Applied → Admitted → Enrolled FT</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Applied</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Admitted</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Enrolled FT</span>
+      </div>
+      <div style="position:relative;height:240px"><canvas id="c1" role="img" aria-label="Clustered bar: admissions funnel by gender">Total: 15533 applied, 11656 admitted, 1613 enrolled. Men: 6945, 5072, 662. Women: 8580, 6579, 950.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Applicants by gender</div>
+      <div class="chart-sub">Fall 2024 total = 15,533</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Women 55% (8,580)</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Men 45% (6,945)</span>
+      </div>
+      <div style="position:relative;height:240px"><canvas id="c2" role="img" aria-label="Donut: Women 8580, Men 6945">Women 55%, Men 45%</canvas></div>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Admit &amp; yield rates by gender</div>
+      <div class="chart-sub">Admit rate = Admitted/Applied · Yield = Enrolled FT/Admitted</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Admit rate</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Yield rate</span>
+      </div>
+      <div style="position:relative;height:200px"><canvas id="c3" role="img" aria-label="Admit and yield rates by gender">Total admit 75%, yield 14%. Men admit 73%, yield 13%. Women admit 77%, yield 14%.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Enrollment breakdown</div>
+      <div class="chart-sub">Full-time vs Part-time enrolled, Fall 2024</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Men FT</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Women FT</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Part-time (total)</span>
+      </div>
+      <div style="position:relative;height:200px"><canvas id="c4" role="img" aria-label="Enrollment breakdown stacked bar">Men FT 662, Women FT 950, PT 2</canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FINANCE ═══════════════ -->
+<div id="finance" class="page">
+  <div class="kpi-row">
+    <div class="kpi kpi-accent"><div class="kpi-label">Revenue per FTE</div><div class="kpi-value">$48.2K</div><div class="kpi-sub">All sources combined</div></div>
+    <div class="kpi kpi-accent2"><div class="kpi-label">Tuition per FTE</div><div class="kpi-value">$21,389</div><div class="kpi-sub">44% of core revenue</div></div>
+    <div class="kpi kpi-accent3"><div class="kpi-label">Investment per FTE</div><div class="kpi-value">$15,915</div><div class="kpi-sub">33% of core revenue</div></div>
+    <div class="kpi kpi-accent4"><div class="kpi-label">Private gifts per FTE</div><div class="kpi-value">$4,852</div><div class="kpi-sub">10% · prospect lever</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Revenue by source</div>
+      <div class="chart-sub">% share of core revenues · FY2024 (FASB)</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Tuition 44%</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Investment 33%</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Private gifts 10%</span>
+        <span><span class="leg-dot" style="background:#BA7517"></span>Govt grants 8%</span>
+        <span><span class="leg-dot" style="background:#888780"></span>Other 5%</span>
+      </div>
+      <div style="position:relative;height:230px"><canvas id="c5" role="img" aria-label="Donut: revenue share by source">Tuition 44%, Investment 33%, Private gifts 10%, Govt grants 8%, Other 5%</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Revenue per FTE by source</div>
+      <div class="chart-sub">Dollar value per full-time equivalent student · FY2024</div>
+      <div style="position:relative;height:270px"><canvas id="c6" role="img" aria-label="Bar chart of revenue per FTE by source">Tuition $21389, Investment $15915, Private gifts $4852, Govt grants $3724, Other $2336</canvas></div>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Expense distribution by function</div>
+      <div class="chart-sub">% share of core expenses · FY2024 (FASB)</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Instruction 40%</span>
+        <span><span class="leg-dot" style="background:#888780"></span>Inst. support 29%</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Acad. support 13%</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Research 10%</span>
+        <span><span class="leg-dot" style="background:#BA7517"></span>Student svc 7%</span>
+        <span><span class="leg-dot" style="background:#5DCAA5"></span>Other 1%</span>
+      </div>
+      <div style="position:relative;height:230px"><canvas id="c7" role="img" aria-label="Donut: expense distribution">Instruction 40%, Institutional support 29%, Academic support 13%, Research 10%, Student services 7%, Other 1%</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Expense per FTE by function</div>
+      <div class="chart-sub">Dollar value per full-time equivalent student · FY2024</div>
+      <div style="position:relative;height:330px"><canvas id="c8" role="img" aria-label="Horizontal bar: expense per FTE by function">Instruction $16954, Inst support $12286, Acad support $5406, Research $4424, Student svc $2916, Public svc $808, Other $85</canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ HR ═══════════════ -->
+<div id="hr" class="page">
+  <div class="kpi-row">
+    <div class="kpi kpi-accent"><div class="kpi-label">Total staff</div><div class="kpi-value">3,341</div><div class="kpi-sub">Excl. grad assistants</div></div>
+    <div class="kpi kpi-accent2"><div class="kpi-label">Full-time staff</div><div class="kpi-value">2,689</div><div class="kpi-sub">80% of total staff</div></div>
+    <div class="kpi kpi-accent3"><div class="kpi-label">Part-time staff</div><div class="kpi-value">652</div><div class="kpi-sub">20% of total staff</div></div>
+    <div class="kpi kpi-accent4"><div class="kpi-label">Grad assistants</div><div class="kpi-value">547</div><div class="kpi-sub">Teaching + research</div></div>
+  </div>
+  <div class="charts-grid single">
+    <div class="chart-card">
+      <div class="chart-title">Staff by occupational category — full-time vs part-time</div>
+      <div class="chart-sub">Fall 2024 · Stacked by employment type</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Full-time</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Part-time</span>
+      </div>
+      <div style="position:relative;height:680px"><canvas id="c9" role="img" aria-label="Stacked horizontal bar: staff by category">Staff counts across all occupational categories</canvas></div>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Full-time vs part-time split</div>
+      <div class="chart-sub">All staff excl. grad assistants · Fall 2024</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Full-time 2,689 (80%)</span>
+        <span><span class="leg-dot" style="background:#D85A30"></span>Part-time 652 (20%)</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="c10" role="img" aria-label="Donut: FT 2689, PT 652">Full-time 80%, Part-time 20%</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Graduate assistants breakdown</div>
+      <div class="chart-sub">547 total grad assistants · Fall 2024</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#185FA5"></span>Research 202 (37%)</span>
+        <span><span class="leg-dot" style="background:#1D9E75"></span>Teaching 201 (37%)</span>
+        <span><span class="leg-dot" style="background:#888780"></span>All other 144 (26%)</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="c11" role="img" aria-label="Donut: grad assistants breakdown">Research 202, Teaching 201, Other 144</canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Source: IPEDS · NCES · Saint Louis University (179159) · Provisional Data 2024–25 &nbsp;·&nbsp; Alumni Engagement &amp; Prospect Research Analytics</div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const BLUE='#185FA5', GREEN='#1D9E75', ORANGE='#D85A30', GOLD='#BA7517', GRAY='#888780', TEAL='#5DCAA5';
+const baseOpts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } };
+const gridColor = 'rgba(0,0,0,0.06)';
+
+function mkAxes(xTitle, yTitle, horizontal) {
+  const x = { grid:{ color: horizontal ? gridColor : 'transparent' }, ticks:{ color:'#5f6b7c', font:{size:11} } };
+  const y = { grid:{ color: horizontal ? 'transparent' : gridColor }, ticks:{ color:'#5f6b7c', font:{size:11} } };
+  if (xTitle) x.title = { display:true, text:xTitle, color:'#8492a6', font:{size:11} };
+  if (yTitle) y.title = { display:true, text:yTitle, color:'#8492a6', font:{size:11} };
+  return { x, y };
+}
+
+// C1 — Admissions funnel clustered bar
+new Chart(document.getElementById('c1'), {
+  type:'bar',
+  data:{
+    labels:['Total','Men','Women'],
+    datasets:[
+      { label:'Applied',      data:[15533,6945,8580], backgroundColor:BLUE,   borderRadius:4 },
+      { label:'Admitted',     data:[11656,5072,6579], backgroundColor:GREEN,  borderRadius:4 },
+      { label:'Enrolled FT',  data:[1613, 662, 950],  backgroundColor:ORANGE, borderRadius:4 },
+    ]
+  },
+  options:{ ...baseOpts, scales:mkAxes(null,'Count') }
+});
+
+// C2 — Gender donut
+new Chart(document.getElementById('c2'), {
+  type:'doughnut',
+  data:{ labels:['Women','Men'], datasets:[{ data:[8580,6945], backgroundColor:[BLUE,GREEN], borderWidth:0, hoverOffset:4 }] },
+  options:{ ...baseOpts, cutout:'62%' }
+});
+
+// C3 — Admit & yield rates
+new Chart(document.getElementById('c3'), {
+  type:'bar',
+  data:{
+    labels:['Total','Men','Women'],
+    datasets:[
+      { label:'Admit rate', data:[0.75,0.73,0.77], backgroundColor:BLUE,   borderRadius:4 },
+      { label:'Yield rate', data:[0.14,0.13,0.14], backgroundColor:ORANGE, borderRadius:4 },
+    ]
+  },
+  options:{ ...baseOpts, scales:{ ...mkAxes(null,'Rate'), y:{ ...mkAxes(null,'Rate').y, ticks:{ callback:v=>(v*100).toFixed(0)+'%', color:'#5f6b7c', font:{size:11} }, max:1 } } }
+});
+
+// C4 — Enrollment stacked
+new Chart(document.getElementById('c4'), {
+  type:'bar',
+  data:{
+    labels:['Men','Women'],
+    datasets:[
+      { label:'Enrolled FT', data:[662,950], backgroundColor:[BLUE,GREEN], borderRadius:4 },
+    ]
+  },
+  options:{ ...baseOpts, scales:mkAxes(null,'Students enrolled') }
+});
+
+// C5 — Revenue donut
+new Chart(document.getElementById('c5'), {
+  type:'doughnut',
+  data:{ labels:['Tuition & fees','Investment return','Private gifts','Govt grants','Other'], datasets:[{ data:[44,33,10,8,5], backgroundColor:[BLUE,GREEN,ORANGE,GOLD,GRAY], borderWidth:0, hoverOffset:4 }] },
+  options:{ ...baseOpts, cutout:'60%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' '+i.label+': '+i.raw+'%' } } } }
+});
+
+// C6 — Revenue per FTE bar
+new Chart(document.getElementById('c6'), {
+  type:'bar',
+  data:{
+    labels:['Tuition','Investment','Private gifts','Govt grants','Other'],
+    datasets:[{ label:'$ per FTE', data:[21389,15915,4852,3724,2336], backgroundColor:[BLUE,GREEN,ORANGE,GOLD,GRAY], borderRadius:4 }]
+  },
+  options:{ ...baseOpts, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' $'+i.raw.toLocaleString() } } }, scales:{ ...mkAxes(null,'USD per FTE'), y:{ ...mkAxes().y, ticks:{ callback:v=>'$'+Math.round(v/1000)+'K', color:'#5f6b7c', font:{size:11} }, grid:{ color:gridColor } } } }
+});
+
+// C7 — Expense donut
+new Chart(document.getElementById('c7'), {
+  type:'doughnut',
+  data:{ labels:['Instruction','Inst. support','Acad. support','Research','Student svc','Other'], datasets:[{ data:[40,29,13,10,7,1], backgroundColor:[BLUE,GRAY,GREEN,ORANGE,GOLD,TEAL], borderWidth:0, hoverOffset:4 }] },
+  options:{ ...baseOpts, cutout:'60%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' '+i.label+': '+i.raw+'%' } } } }
+});
+
+// C8 — Expense per FTE horizontal bar
+new Chart(document.getElementById('c8'), {
+  type:'bar',
+  data:{
+    labels:['Instruction','Inst. support','Acad. support','Research','Student svc','Public svc','Other'],
+    datasets:[{ label:'$ per FTE', data:[16954,12286,5406,4424,2916,808,85], backgroundColor:[BLUE,GRAY,GREEN,ORANGE,GOLD,TEAL,'#C8C7C3'], borderRadius:4 }]
+  },
+  options:{ ...baseOpts, indexAxis:'y', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' $'+i.raw.toLocaleString() } } }, scales:{ x:{ grid:{ color:gridColor }, ticks:{ callback:v=>'$'+Math.round(v/1000)+'K', color:'#5f6b7c', font:{size:11} } }, y:{ grid:{ display:false }, ticks:{ color:'#5f6b7c', font:{size:11} } } } }
+});
+
+// C9 — HR stacked horizontal bar
+new Chart(document.getElementById('c9'), {
+  type:'bar',
+  data:{
+    labels:['Instructional','Management','Office & Admin','Service Occ.','Business & Fin.','Comp/Eng/Sci','Community/Arts','Research','Healthcare','Librarians','Public Service','Production/Trans.','Student Affairs','Nat. Resources','GA - Teaching','GA - Research','GA - Other'],
+    datasets:[
+      { label:'Full-time', data:[778,476,270,292,296,183,138,93,60,44,14,32,12,1,0,0,0], backgroundColor:BLUE, borderRadius:3 },
+      { label:'Part-time', data:[440,2,126,7,1,1,12,17,14,1,28,3,0,0,201,202,144], backgroundColor:ORANGE, borderRadius:3 },
+    ]
+  },
+  options:{ ...baseOpts, indexAxis:'y', scales:{ x:{ stacked:true, grid:{ color:gridColor }, ticks:{ color:'#5f6b7c', font:{size:11} } }, y:{ stacked:true, grid:{ display:false }, ticks:{ color:'#5f6b7c', font:{size:10} } } } }
+});
+
+// C10 — FT/PT donut
+new Chart(document.getElementById('c10'), {
+  type:'doughnut',
+  data:{ labels:['Full-time','Part-time'], datasets:[{ data:[2689,652], backgroundColor:[BLUE,ORANGE], borderWidth:0, hoverOffset:4 }] },
+  options:{ ...baseOpts, cutout:'62%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' '+i.label+': '+i.raw.toLocaleString() } } } }
+});
+
+// C11 — Grad assistants donut
+new Chart(document.getElementById('c11'), {
+  type:'doughnut',
+  data:{ labels:['Research GAs','Teaching GAs','All Other GAs'], datasets:[{ data:[202,201,144], backgroundColor:[BLUE,GREEN,GRAY], borderWidth:0, hoverOffset:4 }] },
+  options:{ ...baseOpts, cutout:'62%', plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:i=>' '+i.label+': '+i.raw } } } }
+});
+</script>
+</body>
+</html>
